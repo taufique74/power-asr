@@ -10,6 +10,7 @@ import json
 from itertools import groupby
 from normalize import NumToTextEng, splitHyphens
 import pyphen
+from .cmudict import cmu_dict
 
 class PronouncerType:
     Base = "base"
@@ -27,8 +28,9 @@ class PronouncerLex(PronouncerBase):
     NOTE: English-only
     '''
     def __init__(self, lexicon):
-        with open(lexicon, 'r') as f:
-            self.lexicon = json.load(f)
+        # with open(lexicon, 'r') as f:
+        #     self.lexicon = json.load(f)
+        self.lexicon = cmu_dict
         self.fallbackDict = pyphen.Pyphen(lang='en_US')
 
     def pronounce(self, words):

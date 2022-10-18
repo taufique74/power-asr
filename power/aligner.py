@@ -120,31 +120,16 @@ class PowerAligner:
     phoneDistPenalty    = 0.25
     phoneDistPenalt16ySet = set(['|'])
     
-    def __init__(self, ref, hyp, lowercase=False, verbose=False,
+    pronouncer = PronouncerLex()
+    
+    def __init__(self, lowercase=False, verbose=False,
                 pronounce_type=PronouncerType.Lexicon,
-                lexicon=None,
                 word_align_weights=Levenshtein.wordAlignWeights):
-        if not ref:
-            raise Exception("No reference file.\nref: {0}\nhyp: {1}".format(ref, hyp))
-
-        if pronounce_type == PronouncerType.Lexicon:
-            self.pronouncer = PronouncerLex(lexicon)
-        else:
-            self.pronouncer = PronouncerBase()
-        
-        self.ref = [x for x in ref.strip().split() if x]
-        self.hyp = [x for x in hyp.strip().split() if x]
-        self.refwords = ' '.join(self.ref)
-        self.hypwords = ' '.join(self.hyp)
         
         self.lowercase = lowercase
         self.verbose = verbose
         
-        # Perform word alignment
-        lev = Levenshtein.align(self.ref, self.hyp, lowercase=self.lowercase, weights=word_align_weights)
-        lev.editops()
-        self.wer_alignment = lev.expandAlign()
-        self.wer, self.wer_components = self.wer_alignment.error_rate()
+        self.word_align_weights = word_align_weights
         
         # Used for POWER alignment
         self.power_alignment = None
@@ -157,7 +142,21 @@ class PowerAligner:
         self.phonetic_alignments = None
         self.phonetic_lev = None
         
-    def align(self):
+    def align(self, ref, hyp):
+        if not ref:
+            raise Exception("No reference file.\nref: {0}\nhyp: {1}".format(ref, hyp))
+        
+        self.ref = [x for x in ref.strip().split() if x]
+        self.hyp = [x for x in hyp.strip().split() if x]
+        self.refwords = ' '.join(self.ref)
+        self.hypwords = ' '.join(self.hyp)
+        
+        # Perform word alignment
+        lev = Levenshtein.align(self.ref, self.hyp, lowercase=self.lowercase, weights=self.word_align_weights)
+        lev.editops()
+        self.wer_alignment = lev.expandAlign()
+        self.wer, self.wer_components = self.wer_alignment.error_rate()
+        
         # Find the error regions that may need to be realigned
         self.split_regions, self.error_indexes = self.wer_alignment.split_error_regions()
         self.phonetic_alignments = [None] * len(self.split_regions)

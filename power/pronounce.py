@@ -27,7 +27,7 @@ class PronouncerLex(PronouncerBase):
     '''Lexicon-based pronunciation generator. Looks up words in the lexicon and if they aren't found, uses a hacky alternative.
     NOTE: English-only
     '''
-    def __init__(self, lexicon):
+    def __init__(self):
         # with open(lexicon, 'r') as f:
         #     self.lexicon = json.load(f)
         self.lexicon = cmu_dict

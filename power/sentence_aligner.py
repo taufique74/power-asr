@@ -40,6 +40,12 @@ class SentenceAlignment:
 
 
 class Aligner:
+    def __init__(self):
+        self.aligner = PowerAligner(
+            lowercase=True, 
+            verbose=False,
+        )
+        
     def create_source_target_pair(self, alignment: SentenceAlignment) -> dict:
         s1 = alignment.get_ref()
         s2 = alignment.get_hyp()
@@ -62,18 +68,30 @@ class Aligner:
         source = source.strip()
         target = target.strip()
 
-        aligner = PowerAligner(
-            source,
-            target, 
-            lowercase=True, 
-            verbose=False,
-        )
-        aligner.align()
+        try:
+            self.aligner.align(source, target)
+            aligned = self.create_source_target_pair(SentenceAlignment(
+                ref = self.aligner.power_alignment.s1,
+                hyp = self.aligner.power_alignment.s2,
+                alignment = self.aligner.power_alignment
+            ))
+        except:
+            # aligned = self.create_source_target_pair(SentenceAlignment(
+            #     ref = source.split(),
+            #     hyp = target.split(),
+            #     alignment = []
+            # ))
+            aligned = dict(
+                source = source.split(),
+                target = target.split(),
+                sub_ids = []
+            )
+            
 
-        aligned = self.create_source_target_pair(SentenceAlignment(
-            ref = aligner.power_alignment.s1,
-            hyp = aligner.power_alignment.s2,
-            alignment = aligner.power_alignment
-        ))
+        # aligned = self.create_source_target_pair(SentenceAlignment(
+        #     ref = self.aligner.power_alignment.s1,
+        #     hyp = self.aligner.power_alignment.s2,
+        #     alignment = self.aligner.power_alignment
+        # ))
         
         return aligned
